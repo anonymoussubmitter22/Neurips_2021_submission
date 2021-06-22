@@ -1,0 +1,1 @@
+python train_speaker_embeddings.py exp_params/alphaRatio_sma3.yaml yamls/alphaRatio_sma3.yaml

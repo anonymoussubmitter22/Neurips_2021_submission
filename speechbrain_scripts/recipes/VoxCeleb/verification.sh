@@ -1,0 +1,1 @@
+python speaker_verification_plda.py alpharatio_verif.yaml

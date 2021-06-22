@@ -1,0 +1,20 @@
+['audspecRasta_lengthL1norm_sma', 'logHNR_sma', 'voicingFinalUnclipped_sma', 'pcm_RMSenergy_sma', 'alphaRatio_sma3', 'F0final_sma', 'pcm_zcr_sma']
+test number :0 
+tensor([[0.0306, 0.3457, 0.0000, 0.0000, 0.3110, 0.3128, 0.0000]],
+       grad_fn=<SparsemaxFunctionBackward>)
+tensor([0.0036], grad_fn=<AddBackward0>)test number :1 
+tensor([[0.0601, 0.3200, 0.0000, 0.0000, 0.2955, 0.3244, 0.0000]],
+       grad_fn=<SparsemaxFunctionBackward>)
+tensor([0.0036], grad_fn=<AddBackward0>)test number :2 
+tensor([[0.0318, 0.3282, 0.0000, 0.0000, 0.2999, 0.3400, 0.0000]],
+       grad_fn=<SparsemaxFunctionBackward>)
+tensor([0.0036], grad_fn=<AddBackward0>)test number :3 
+tensor([[0.0447, 0.3285, 0.0000, 0.0000, 0.2926, 0.3341, 0.0000]],
+       grad_fn=<SparsemaxFunctionBackward>)
+tensor([0.0036], grad_fn=<AddBackward0>)test number :4 
+tensor([[0.0110, 0.2977, 0.0000, 0.0000, 0.3156, 0.3757, 0.0000]],
+       grad_fn=<SparsemaxFunctionBackward>)
+tensor([0.0036], grad_fn=<AddBackward0>)test number :5 
+tensor([[0.0575, 0.2710, 0.0000, 0.0000, 0.2969, 0.3745, 0.0000]],
+       grad_fn=<SparsemaxFunctionBackward>)
+tensor([0.0036], grad_fn=<AddBackward0>)test number :6 

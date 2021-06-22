@@ -1,0 +1,2 @@
+tensor([[0.0378, 0.3135, 0.0000, 0.0000, 0.2960, 0.3527, 0.0000]],
+       grad_fn=<SparsemaxFunctionBackward>)tensor([0.0036], grad_fn=<AddBackward0>)

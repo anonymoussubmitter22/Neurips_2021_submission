@@ -1,0 +1,3 @@
+['audspecRasta_lengthL1norm_sma', 'logHNR_sma', 'voicingFinalUnclipped_sma', 'pcm_RMSenergy_sma', 'alphaRatio_sma3', 'F0final_sma', 'pcm_zcr_sma']
+tensor([[0.0701, 0.2613, 0.1678, 0.0760, 0.1250, 0.1285, 0.1712]],
+       grad_fn=<SparsemaxFunctionBackward>)tensor([0.0101], grad_fn=<AddBackward0>)

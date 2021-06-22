@@ -1,0 +1,11 @@
+Metadata-Version: 1.2
+Name: SpeechBrain
+Version: 0.0.1
+Summary: All-in-one speech toolkit in pure Python and Pytorch
+Home-page: UNKNOWN
+Author: Mirco Ravanelli & Others
+Author-email: speechbrain@gmail.com
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
+Requires-Python: >=3.7

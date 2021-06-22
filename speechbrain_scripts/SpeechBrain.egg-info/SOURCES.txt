@@ -1,0 +1,9 @@
+README.md
+pyproject.toml
+setup.py
+SpeechBrain.egg-info/PKG-INFO
+SpeechBrain.egg-info/SOURCES.txt
+SpeechBrain.egg-info/dependency_links.txt
+SpeechBrain.egg-info/top_level.txt
+speechbrain/__init__.py
+speechbrain/core.py

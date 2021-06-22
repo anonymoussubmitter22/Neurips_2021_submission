@@ -1,0 +1,4 @@
+#!/bin/zsh
+mkdir cut_timit_downsampling10
+python K_matrices_timit.py good_cut_melfs/ cut_timit_downsampling10 
+python timit_HSIC.py good_cut_melfs/ phone_level_gemaps_means_timit alphaRatio_sma3 cut_timit_downsampling10 cut_timit_downsampling10
