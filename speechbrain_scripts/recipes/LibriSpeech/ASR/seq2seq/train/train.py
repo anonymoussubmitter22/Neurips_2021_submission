@@ -50,11 +50,11 @@ import speechbrain as sb
 from speechbrain.utils.distributed import run_on_main
 from hyperpyyaml import load_hyperpyyaml
 from pathlib import Path
+from pase_train import PASE
 
 logger = logging.getLogger(__name__)
 
 
-from pase_train import PASE
 # Define training procedure
 class ASR(sb.Brain):
     def compute_forward(self, batch, stage):
@@ -65,25 +65,29 @@ class ASR(sb.Brain):
         wavs, wav_lens = wavs.to(self.device), wav_lens.to(self.device)
 
         # Add augmentation if specified
-        if stage == sb.Stage.TRAIN:
-            if hasattr(self.modules, "env_corrupt"):
-                wavs_noise = self.modules.env_corrupt(wavs, wav_lens)
-                wavs = torch.cat([wavs, wavs_noise], dim=0)
-                wav_lens = torch.cat([wav_lens, wav_lens])
-                tokens_bos = torch.cat([tokens_bos, tokens_bos], dim=0)
+        # if stage == sb.Stage.TRAIN:
+        #    if hasattr(self.modules, "env_corrupt"):
+        #        wavs_noise = self.modules.env_corrupt(wavs, wav_lens)
+        ##        wavs = torch.cat([wavs, wavs_noise], dim=0)
+        #        wav_lens = torch.cat([wav_lens, wav_lens])
+        #        tokens_bos = torch.cat([tokens_bos, tokens_bos], dim=0)
 
-            if hasattr(self.hparams, "augmentation"):
-                wavs = self.hparams.augmentation(wavs, wav_lens)
+        #    if hasattr(self.hparams, "augmentation"):
+        #        wavs = self.hparams.augmentation(wavs, wav_lens)
 
         # Forward pass
         feats = self.hparams.compute_features(wavs)
         feats = self.modules.normalize(feats, wav_lens)
-        if self.hparams.baseline : 
+        if self.hparams.baseline:
             embeddings = feats
-        else : 
-            embeddings = PASE_brain.modules.enc(feats)
+        else:
+            with torch.no_grad():
+                embeddings = PASE_brain.modules.enc(feats)
+                embeddings = torch.nn.functional.layer_norm(
+                    embeddings, normalized_shape=embeddings.shape
+                ).detach()
 
-        x = self.modules.enc(embeddings.detach())
+        x = self.modules.enc(embeddings)
 
         e_in = self.modules.emb(tokens_bos)  # y_in bos + tokens
         h, _ = self.modules.dec(e_in, x, wav_lens)
@@ -106,7 +110,7 @@ class ASR(sb.Brain):
             if stage == sb.Stage.VALID:
                 p_tokens, scores = self.hparams.valid_search(x, wav_lens)
             else:
-                p_tokens, scores = self.hparams.test_search(x, wav_lens)
+                p_tokens, scores = self.hparams.valid_search(x, wav_lens)
             return p_seq, wav_lens, p_tokens
 
     def compute_objectives(self, predictions, batch, stage):
@@ -124,14 +128,6 @@ class ASR(sb.Brain):
         ids = batch.id
         tokens_eos, tokens_eos_lens = batch.tokens_eos
         tokens, tokens_lens = batch.tokens
-
-        if hasattr(self.modules, "env_corrupt") and stage == sb.Stage.TRAIN:
-            tokens_eos = torch.cat([tokens_eos, tokens_eos], dim=0)
-            tokens_eos_lens = torch.cat(
-                [tokens_eos_lens, tokens_eos_lens], dim=0
-            )
-            tokens = torch.cat([tokens, tokens], dim=0)
-            tokens_lens = torch.cat([tokens_lens, tokens_lens], dim=0)
 
         loss_seq = self.hparams.seq_cost(
             p_seq, tokens_eos, length=tokens_eos_lens
@@ -197,7 +193,7 @@ class ASR(sb.Brain):
 
         # Perform end-of-iteration things, like annealing, logging, etc.
         if stage == sb.Stage.VALID:
-            old_lr, new_lr = self.hparams.lr_annealing(stage_stats["WER"])
+            old_lr, new_lr = self.hparams.lr_annealing(stage_stats["loss"])
             sb.nnet.schedulers.update_learning_rate(self.optimizer, new_lr)
             self.hparams.train_logger.log_stats(
                 stats_meta={"epoch": epoch, "lr": old_lr},
@@ -306,7 +302,11 @@ if __name__ == "__main__":
 
     # CLI:
     hparams_file, run_opts, overrides = sb.parse_arguments(sys.argv[2:])
-    enc_params_file,run_opts_enc,  overrides_enc = sb.parse_arguments([sys.argv[1]])
+    enc_params_file, run_opts_enc, overrides_enc = sb.parse_arguments(
+        [sys.argv[1]]
+    )
+    print(overrides)
+    print(overrides_enc)
     with open(enc_params_file) as encoding_params:
         enc_params = load_hyperpyyaml(encoding_params, overrides_enc)
 
@@ -345,14 +345,16 @@ if __name__ == "__main__":
     # here we create the datasets objects as well as tokenization and encoding
     train_data, valid_data, test_datasets, tokenizer = dataio_prepare(hparams)
     PASE_brain = PASE(
-            modules=enc_params["modules"],
-            hparams=enc_params,
-            run_opts= run_opts_enc,
-            opt_class=enc_params["opt_class"],
-            checkpointer=enc_params["checkpointer"],
-        )
+        modules=enc_params["modules"],
+        hparams=enc_params,
+        run_opts=run_opts_enc,
+        opt_class=enc_params["opt_class"],
+        checkpointer=enc_params["checkpointer"],
+    )
 
     PASE_brain.checkpointer.recover_if_possible()
+
+    PASE_brain.modules.enc.eval()
 
     # Trainer initialization
     asr_brain = ASR(
@@ -371,13 +373,13 @@ if __name__ == "__main__":
         asr_brain.load_lm()
 
     # Training
-    asr_brain.fit(
-        asr_brain.hparams.epoch_counter,
-        train_data,
-        valid_data,
-        train_loader_kwargs=hparams["train_dataloader_opts"],
-        valid_loader_kwargs=hparams["valid_dataloader_opts"],
-    )
+    # asr_brain.fit(
+    #    asr_brain.hparams.epoch_counter,
+    #    train_data,
+    #    valid_data,
+    #    train_loader_kwargs=hparams["train_dataloader_opts"],
+    #    valid_loader_kwargs=hparams["valid_dataloader_opts"],
+    # )
 
     # Testing
     for k in test_datasets.keys():  # keys are test_clean, test_other etc

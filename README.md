@@ -30,7 +30,8 @@ Speaker Recognition is a two-step action in our work. First, we train Xvectors, 
 Pretrained models for the CommonVoice pretraining and the VoxCeleb embedder are available here : 
 https://1drv.ms/u/s!AtZNOLRhbqF6aH0KE5qIbwzEf60?e=NTaFDL
 
-CommonVoice pretrained models can be used for the downstream tasks, by copying the folder in the Downstream task folder, than running
+CommonVoice pretrained models can be used for the downstream tasks, by copying the folder in the Downstream task folder
 
+VoxCeleb pretrained models can be used for the verification phase, by running a command similar to the one given in verification.sh 
 
-VoxCeleb pretrained models can be used for the verification phase, 
+In both cases, you can run the retraining by following the examples given in the .sh files. 
